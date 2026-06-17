@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { supabase } from '../config/supabase';
 import { useRouter } from 'expo-router';
-import { Flame, Mail, Lock, User } from 'lucide-react-native';
+import { Flame, Mail, Lock, User, AlertCircle } from 'lucide-react-native';
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -26,18 +26,47 @@ export default function AuthScreen() {
   // UI interface status flags
   const [isRegistering, setIsRegistering] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // NEW: Inline form validation & error tracking feedback state
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // NEW: Helper function to parse messy backend database strings into friendly alerts
+  const getFriendlyErrorMessage = (error: any): string => {
+    const msg = error?.message?.toLowerCase() || '';
+    
+    if (msg.includes('invalid login credentials')) {
+      return 'Incorrect email address or password. Please try again.';
+    }
+    if (msg.includes('email rate limit')) {
+      return 'Too many attempts. Please wait a moment before trying again.';
+    }
+    if (msg.includes('user already exists')) {
+      return 'An account with this email address already exists.';
+    }
+    if (msg.includes('password should be at least')) {
+      return 'Security rules error: Your password must be at least 6 characters long.';
+    }
+    if (msg.includes('unable to validate email')) {
+      return 'Please input a valid email address format.';
+    }
+    
+    return error.message || 'Network connection breakdown. Please check your signal.';
+  };
 
   const handleAuthAction = async () => {
+    // Clear out any previous errors right away
+    setErrorMessage(null);
+
+    // Form inputs pre-flight safety validations
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing Fields', 'Please fill in all security input fields.');
+      setErrorMessage('Please fill in both your email address and password.');
       return;
     }
     if (isRegistering && !customerName.trim()) {
-      Alert.alert('Name Required', 'Please enter your name for profile collection setup.');
+      setErrorMessage('Please enter your full name to set up your food profile.');
       return;
     }
 
-    setLoading(false);
     try {
       setLoading(true);
 
@@ -47,7 +76,6 @@ export default function AuthScreen() {
           email: email.trim(),
           password: password.trim(),
           options: {
-            // Attach user metadata to extract the display name on login later
             data: { display_name: customerName.trim() }
           }
         });
@@ -68,14 +96,20 @@ export default function AuthScreen() {
 
         if (error) throw error;
         
-        // Push user inside the tab router system layout completely
         router.replace('/(tabs)');
       }
     } catch (err: any) {
-      Alert.alert('Authentication Failed', err.message || 'An error occurred during verification.');
+      // Direct the custom message string to our user dashboard banner hook
+      setErrorMessage(getFriendlyErrorMessage(err));
     } finally {
       setLoading(false);
     }
+  };
+
+  // Safe cleaner helper to switch between forms instantly
+  const toggleFormMode = () => {
+    setErrorMessage(null);
+    setIsRegistering(!isRegistering);
   };
 
   return (
@@ -99,6 +133,14 @@ export default function AuthScreen() {
           <Text style={styles.formContextTitle}>
             {isRegistering ? 'Create Account' : 'Welcome Back'}
           </Text>
+
+          {/* NEW: DYNAMIC INLINE ERROR FEEDBACK BOX BANNER */}
+          {errorMessage && (
+            <View style={styles.errorBannerContainer}>
+              <AlertCircle size={16} color="#FF3B30" style={{ marginRight: 8, marginTop: 1 }} />
+              <Text style={styles.errorBannerText}>{errorMessage}</Text>
+            </View>
+          )}
 
           {isRegistering && (
             <View style={styles.inputWrapper}>
@@ -159,7 +201,7 @@ export default function AuthScreen() {
           {/* Toggle interface switch line */}
           <TouchableOpacity 
             style={styles.toggleInterfaceBtn} 
-            onPress={() => setIsRegistering(!isRegistering)}
+            onPress={toggleFormMode}
           >
             <Text style={styles.toggleInterfaceText}>
               {isRegistering 
@@ -187,6 +229,20 @@ const styles = StyleSheet.create({
   // Interactive Form Elements
   formContainer: { backgroundColor: '#161618', borderRadius: 24, padding: 20, borderWidth: 1, borderColor: '#262629' },
   formContextTitle: { fontSize: 18, fontWeight: '800', color: '#FFF', marginBottom: 20 },
+  
+  // NEW: Inline validation box styles matching dark modern card layout
+  errorBannerContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 59, 48, 0.1)', 
+    borderWidth: 1, 
+    borderColor: 'rgba(255, 59, 48, 0.2)',
+    borderRadius: 12, 
+    padding: 12, 
+    marginBottom: 16 
+  },
+  errorBannerText: { flex: 1, color: '#FF453A', fontSize: 13, fontWeight: '500', lineHeight: 17 },
+
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#09090B', borderWidth: 1, borderColor: '#262629', borderRadius: 12, height: 48, paddingHorizontal: 12, marginBottom: 14 },
   inputIcon: { marginRight: 10 },
   input: { flex: 1, color: '#FFF', fontSize: 14 },
