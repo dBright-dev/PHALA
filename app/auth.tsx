@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Image
 } from 'react-native';
 import { supabase } from '../config/supabase';
 import { useRouter } from 'expo-router';
@@ -125,7 +126,11 @@ export default function AuthScreen() {
         {/* Brand Identity Branding Header Block */}
         <View style={styles.headerBlock}>
           <View style={styles.logoBadge}>
-            <Flame size={32} color="#FFF" />
+            <Image 
+              source={require('../assets/logoT.png')} // Points to your custom truck logo file
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.brandTitle}>Thabang Food</Text>
           <Text style={styles.brandTagline}>Premium local street flavors, straight to your pocket.</Text>
@@ -224,6 +229,11 @@ const styles = StyleSheet.create({
   scrollContainer: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   headerBlock: { alignItems: 'center', marginBottom: 40 },
   logoBadge: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#FF7600', justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  
+  logoImage: {
+    width: '95%',            // Leaves a comfortable orange padding border around the logo shape
+    height: '95%',
+  },
   brandTitle: { fontSize: 28, fontWeight: '900', color: '#FFF', letterSpacing: -0.5 },
   brandTagline: { fontSize: 13, color: '#8E8E93', textAlign: 'center', marginTop: 6, paddingHorizontal: 20 },
   formContainer: { backgroundColor: '#161618', borderRadius: 24, padding: 20, borderWidth: 1, borderColor: '#262629' },

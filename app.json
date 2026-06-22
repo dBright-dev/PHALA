@@ -11,6 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.thabi.app",
+      "icon": "./assets/logoT.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
