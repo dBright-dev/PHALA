@@ -4,7 +4,7 @@
     "slug": "Phala",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/logoT.png",
     "scheme": "phala",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -17,8 +17,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/logo.png"
+        "backgroundColor": "#FF7600",
+        "foregroundImage": "./assets/logoT.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
